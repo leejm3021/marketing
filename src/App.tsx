@@ -48,7 +48,15 @@ export default function App() {
         body: JSON.stringify({ apiKey: trimmedKey }),
       });
 
-      const data = await response.json();
+      let data: any = {};
+      const rawText = await response.text();
+      try {
+        data = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.error("API response parsing failed:", parseErr, rawText);
+        data = { error: `서버 응답 해석 실패 (HTTP 상태코드 ${response.status})` };
+      }
+
       if (response.ok && data.success) {
         localStorage.setItem("gemini_api_key", trimmedKey);
         setCustomApiKeyState(trimmedKey);
@@ -59,8 +67,9 @@ export default function App() {
         setValidationMessage(data.error || "API Key가 유효하지 않습니다. 확인 후 다시 입력해주세요.");
       }
     } catch (err: any) {
+      console.error("API Key Validation network/fetch error:", err);
       setValidationStatus("error");
-      setValidationMessage("서버 통신 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      setValidationMessage(`서버 통신 오류가 발생했습니다: ${err.message || "연결 실패"}. 잠시 후 다시 시도해주세요.`);
     } finally {
       setIsValidating(false);
     }

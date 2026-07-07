@@ -75,8 +75,24 @@ app.post("/api/validate-key", async (req, res) => {
       return res.status(400).json({ error: "유효하지 않은 API Key 반응입니다." });
     }
   } catch (error: any) {
-    // Return a clean, user-friendly message without raw Google API error payload and do NOT log the raw error structure to the console.
-    return res.status(400).json({ error: "입력하신 API Key가 유효하지 않습니다. Google AI Studio에서 올바른 키를 다시 발급받아 입력해주세요." });
+    const errStr = String(error?.message || error);
+    console.log("[Validate-Key Exception]:", errStr.substring(0, 300));
+    
+    if (errStr.includes("503") || errStr.includes("UNAVAILABLE") || errStr.includes("RESOURCE_EXHAUSTED") || errStr.includes("high demand")) {
+      return res.status(503).json({ 
+        error: "현재 Google Gemini API 서버가 일시적으로 매우 혼잡하여 키 검증을 완료할 수 없습니다. 잠시 후 다시 'API Key 등록 및 승인' 버튼을 눌러주세요." 
+      });
+    }
+    
+    if (errStr.includes("API key not valid") || errStr.includes("INVALID_ARGUMENT") || errStr.includes("API_KEY_INVALID")) {
+      return res.status(400).json({ 
+        error: "입력하신 API Key가 유효하지 않습니다. Google AI Studio(aistudio.google.com)에서 발급받은 올바른 API Key인지 다시 한 번 확인해 주세요." 
+      });
+    }
+
+    return res.status(400).json({ 
+      error: `API Key 상태 검증 실패: ${error?.message || "입력 값을 확인해 주세요."}` 
+    });
   }
 });
 

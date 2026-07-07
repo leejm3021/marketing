@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Noto Sans KR", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Background Mesh Gradients */
+.ambient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -10;
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 10% 20%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+    radial-gradient(at 90% 10%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 90%, rgba(244, 63, 94, 0.1) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
+    radial-gradient(at 20% 80%, rgba(45, 212, 191, 0.15) 0px, transparent 50%);
+  background-size: 100% 100%;
+}
+
+/* Liquid Glass Cards */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 
+    0 10px 40px -10px rgba(15, 23, 42, 0.05),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 4px 20px -5px rgba(15, 23, 42, 0.03),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+/* Option selection logic with Liquid Glass accents */
+.option-card {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.option-card:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.08);
+}
+
+.option-card-selected {
+  background: linear-gradient(135deg, rgba(255, 241, 242, 0.8) 0%, rgba(243, 244, 246, 0.8) 50%, rgba(236, 254, 255, 0.8) 100%);
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 
+    0 12px 30px -10px rgba(99, 102, 241, 0.25),
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+/* High fidelity Liquid Glass buttons */
+.liquid-btn-primary {
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  border-radius: 9999px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 14px rgba(124, 58, 237, 0.3),
+    inset 0 2px 2px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.15);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-btn-primary:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 
+    0 8px 20px rgba(124, 58, 237, 0.4),
+    inset 0 2px 2px rgba(255, 255, 255, 0.55);
+}
+
+.liquid-btn-primary:active {
+  transform: translateY(0.5px);
+}
+
+.liquid-btn-secondary {
+  background: linear-gradient(135deg, #2dd4bf 0%, #06b6d4 100%);
+  border-radius: 9999px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 14px rgba(6, 182, 212, 0.3),
+    inset 0 2px 2px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 2px rgba(0, 0, 0, 0.15);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-btn-secondary:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 
+    0 8px 20px rgba(6, 182, 212, 0.4),
+    inset 0 2px 2px rgba(255, 255, 255, 0.55);
+}
+
+.liquid-btn-secondary:active {
+  transform: translateY(0.5px);
+}
+
+/* Beautiful liquid glowing glass badge style */
+.liquid-glow-box {
+  background: linear-gradient(135deg, rgba(254, 215, 170, 0.5) 0%, rgba(253, 186, 116, 0.5) 20%, rgba(221, 214, 254, 0.5) 60%, rgba(186, 230, 253, 0.5) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 10px 30px rgba(221, 214, 254, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+

@@ -1,0 +1,6 @@
+{
+  "name": "웹툰 및 웹소설 IP 마케팅 플래너",
+  "description": "10년 차 수석 마케터의 Sequential Prompting 대화를 통해 웹툰/웹소설 IP 맞춤형 SNS 마케팅 기획안, 주간 캘린더, 채널별 상세 콘텐츠 카피 및 숏폼 대본을 설계해 주는 시스템",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

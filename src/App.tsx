@@ -3,6 +3,7 @@ import { AppState, SurveyAnswers, StepKey, Option } from "./types";
 import { STEPS } from "./data";
 import StepTimeline from "./components/StepTimeline";
 import LiveSummarySidebar from "./components/LiveSummarySidebar";
+import { validateApiKeyDirect, generatePlanDirect } from "./lib/geminiDirect";
 import ProposalViewer from "./components/ProposalViewer";
 import { 
   Target, BookOpen, Smartphone, Users, Sparkles, TrendingUp, 
@@ -40,31 +41,56 @@ export default function App() {
     setIsValidating(true);
     setValidationMessage("");
     try {
-      const response = await fetch("/api/validate-key", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ apiKey: trimmedKey }),
-      });
+      let isSuccess = false;
+      let errorMsg = "";
 
-      let data: any = {};
-      const rawText = await response.text();
+      // 1. Try local Express backend first
       try {
-        data = JSON.parse(rawText);
-      } catch (parseErr) {
-        console.error("API response parsing failed:", parseErr, rawText);
-        data = { error: `서버 응답 해석 실패 (HTTP 상태코드 ${response.status})` };
+        const response = await fetch("/api/validate-key", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ apiKey: trimmedKey }),
+        });
+
+        const rawText = await response.text();
+        let data: any = {};
+        try {
+          data = JSON.parse(rawText);
+        } catch {
+          data = { error: `HTTP ${response.status}` };
+        }
+
+        if (response.ok && data.success) {
+          isSuccess = true;
+        } else {
+          errorMsg = data.error || "API Key가 유효하지 않습니다.";
+          // If we got a 404 (like on Vercel static hosting) or HTML/redirection text, throw to trigger fallback
+          if (response.status === 404 || response.status >= 500 || rawText.includes("<!DOCTYPE html>")) {
+            throw new Error("backend_unavailable");
+          }
+        }
+      } catch (backendErr: any) {
+        console.log("Backend key validation failed/unavailable, falling back to direct browser verification...", backendErr);
+        try {
+          const directOk = await validateApiKeyDirect(trimmedKey);
+          if (directOk) {
+            isSuccess = true;
+          }
+        } catch (directErr: any) {
+          errorMsg = directErr.message || "브라우저 직접 검증에 실패했습니다. 올바른 API Key인지 다시 확인해주세요.";
+        }
       }
 
-      if (response.ok && data.success) {
+      if (isSuccess) {
         localStorage.setItem("gemini_api_key", trimmedKey);
         setCustomApiKeyState(trimmedKey);
         setValidationStatus("success");
         setValidationMessage("API Key가 성공적으로 검증 및 저장되었습니다!");
       } else {
         setValidationStatus("error");
-        setValidationMessage(data.error || "API Key가 유효하지 않습니다. 확인 후 다시 입력해주세요.");
+        setValidationMessage(errorMsg);
       }
     } catch (err: any) {
       console.error("API Key Validation network/fetch error:", err);
@@ -360,27 +386,62 @@ export default function App() {
     setErrorText("");
     
     try {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (customApiKey) {
-        headers["x-gemini-api-key"] = customApiKey;
+      let planText = "";
+      let isSuccess = false;
+
+      // 1. Try local Express backend first
+      try {
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+        if (customApiKey) {
+          headers["x-gemini-api-key"] = customApiKey;
+        }
+
+        const response = await fetch("/api/generate-plan", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ ...answers, customApiKey }),
+        });
+
+        if (!response.ok) {
+          const rawText = await response.text();
+          // If 404 (static deployment) or server error, trigger direct fallback
+          if (response.status === 404 || response.status >= 500 || rawText.includes("<!DOCTYPE html>")) {
+            throw new Error("backend_unavailable");
+          }
+          let errorData: any = {};
+          try {
+            errorData = JSON.parse(rawText);
+          } catch {
+            errorData = { error: rawText };
+          }
+          throw new Error(errorData.error || "제안서 생성 도중 오류가 발생했습니다.");
+        }
+
+        const data = await response.json();
+        planText = data.plan;
+        isSuccess = true;
+      } catch (backendErr: any) {
+        if (backendErr.message === "backend_unavailable" || backendErr.message.includes("Failed to fetch") || backendErr.message.includes("network")) {
+          console.log("Backend generation unavailable, falling back to direct browser generation...", backendErr);
+          try {
+            planText = await generatePlanDirect(answers, customApiKey);
+            isSuccess = true;
+          } catch (directErr: any) {
+            throw new Error(directErr.message || "브라우저에서 직접 제안서를 생성하는 도중 오류가 발생했습니다.");
+          }
+        } else {
+          throw backendErr;
+        }
       }
 
-      const response = await fetch("/api/generate-plan", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ ...answers, customApiKey }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "제안서 생성 도중 오류가 발생했습니다.");
+      if (isSuccess && planText) {
+        setGeneratedPlan(planText);
+        setAppState("result");
+      } else {
+        throw new Error("마케팅 제안서 생성에 실패했습니다.");
       }
-
-      const data = await response.json();
-      setGeneratedPlan(data.plan);
-      setAppState("result");
     } catch (err: any) {
       console.error(err);
       setErrorText(err.message || "연결 상태가 올바르지 않거나 API 오류가 발생했습니다. 다시 시도해 주세요.");

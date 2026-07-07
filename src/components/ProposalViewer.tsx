@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { SurveyAnswers } from "../types";
 import { 
-  Copy, Check, Printer, Share2, Instagram, Youtube, Twitter, 
+  Copy, Check, Download, Share2, Instagram, Youtube, Twitter, 
   MessageSquare, BookOpen, Sparkles, TrendingUp, FileText, 
   Layers, Eye, Calendar, AlertCircle, RefreshCw, Send, ShieldCheck
 } from "lucide-react";
@@ -24,9 +24,27 @@ export default function ProposalViewer({ planText, answers, onReset }: ProposalV
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Simple print handler
-  const handlePrint = () => {
-    window.print();
+  // Save full plan to a file
+  const handleSave = () => {
+    try {
+      const blob = new Blob([planText], { type: "text/markdown;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      
+      const genre = answers.step1 || "IP";
+      const target = answers.step0 || "마케팅";
+      const cleanGenre = genre.replace(/[\/\\?%*:|"<>\s]/g, "_");
+      const cleanTarget = target.replace(/[\/\\?%*:|"<>\s]/g, "_");
+      link.download = `${cleanGenre}_${cleanTarget}_마케팅_제안서.md`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("파일 저장 에러:", err);
+    }
   };
 
   // Helper to parse sections from markdown response
@@ -220,11 +238,11 @@ export default function ProposalViewer({ planText, answers, onReset }: ProposalV
               )}
             </button>
             <button
-              onClick={handlePrint}
+              onClick={handleSave}
               className="px-5 py-2.5 liquid-btn-secondary text-white font-bold text-xs rounded-full transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <Printer className="h-3.5 w-3.5" />
-              인쇄하기
+              <Download className="h-3.5 w-3.5" />
+              저장하기
             </button>
             <button
               onClick={onReset}

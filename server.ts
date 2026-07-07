@@ -35,11 +35,40 @@ app.post("/api/validate-key", async (req, res) => {
       return res.status(400).json({ error: "API Key가 전달되지 않았습니다." });
     }
     const ai = new GoogleGenAI({ apiKey });
-    // Try a simple call to verify the key using gemini-3.5-flash
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: "OK",
-    });
+    
+    // Try primary gemini-3.5-flash first, then fallback to gemini-2.5-flash or gemini-1.5-flash if 503/UNAVAILABLE occurs
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: "OK",
+      });
+    } catch (innerErr: any) {
+      const errStr = String(innerErr?.message || innerErr);
+      const isTemporary = errStr.includes("503") || errStr.includes("UNAVAILABLE") || errStr.includes("RESOURCE_EXHAUSTED") || errStr.includes("high demand");
+      if (isTemporary) {
+        try {
+          response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: "OK",
+          });
+        } catch (innerErr2: any) {
+          const errStr2 = String(innerErr2?.message || innerErr2);
+          const isTemporary2 = errStr2.includes("503") || errStr2.includes("UNAVAILABLE") || errStr2.includes("RESOURCE_EXHAUSTED") || errStr2.includes("high demand");
+          if (isTemporary2) {
+            response = await ai.models.generateContent({
+              model: "gemini-1.5-flash",
+              contents: "OK",
+            });
+          } else {
+            throw innerErr2;
+          }
+        }
+      } else {
+        throw innerErr;
+      }
+    }
+
     if (response && response.text) {
       return res.json({ success: true });
     } else {
@@ -160,18 +189,61 @@ ${step7.includes("카카오톡 채널") || step7.includes("커뮤니티(디시/�
 - 각 채널별로 확인하면 좋은 핵심 지표 (저장수/공유수, 완주율, 프로필 클릭률, 유입 전환율 등) 1~2개씩 구체적으로 제안`;
 
     const ai = getGeminiClient(customApiKey);
-    const result = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: userPrompt,
-      config: {
-        systemInstruction: systemInstruction,
-        temperature: 0.7,
-      },
-    });
+    let result;
+    try {
+      result = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: userPrompt,
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.7,
+        },
+      });
+    } catch (innerErr: any) {
+      const errStr = String(innerErr?.message || innerErr);
+      const isTemporary = errStr.includes("503") || errStr.includes("UNAVAILABLE") || errStr.includes("RESOURCE_EXHAUSTED") || errStr.includes("high demand");
+      if (isTemporary) {
+        console.log("gemini-3.5-flash failed due to 503/high demand. Falling back to gemini-2.5-flash...");
+        try {
+          result = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: userPrompt,
+            config: {
+              systemInstruction: systemInstruction,
+              temperature: 0.7,
+            },
+          });
+        } catch (innerErr2: any) {
+          const errStr2 = String(innerErr2?.message || innerErr2);
+          const isTemporary2 = errStr2.includes("503") || errStr2.includes("UNAVAILABLE") || errStr2.includes("RESOURCE_EXHAUSTED") || errStr2.includes("high demand");
+          if (isTemporary2) {
+            console.log("gemini-2.5-flash also failed due to high demand. Falling back to gemini-1.5-flash...");
+            result = await ai.models.generateContent({
+              model: "gemini-1.5-flash",
+              contents: userPrompt,
+              config: {
+                systemInstruction: systemInstruction,
+                temperature: 0.7,
+              },
+            });
+          } else {
+            throw innerErr2;
+          }
+        }
+      } else {
+        throw innerErr;
+      }
+    }
 
     res.json({ plan: result.text });
   } catch (error: any) {
-    console.error("API Error:", error);
+    console.error("API Error in generate-plan:", error);
+    const errStr = String(error?.message || error);
+    if (errStr.includes("503") || errStr.includes("UNAVAILABLE") || errStr.includes("RESOURCE_EXHAUSTED") || errStr.includes("high demand")) {
+      return res.status(503).json({
+        error: "현재 Google Gemini API 서버가 일시적으로 매우 혼잡합니다. 잠시 후 '제안서 자동 생성' 버튼을 다시 클릭하여 시도해 주세요."
+      });
+    }
     res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 });

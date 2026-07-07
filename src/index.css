@@ -6,6 +6,8 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
+@variant dark (&:where(.dark, .dark *));
+
 /* Background Mesh Gradients */
 .ambient-bg {
   position: fixed;
@@ -140,5 +142,160 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.5);
+}
+
+/* ==========================================
+   Dark Theme Palette & Global Overrides
+   ========================================== */
+.dark {
+  color-scheme: dark;
+}
+
+.dark .ambient-bg {
+  background-color: #0b0f19;
+  background-image: 
+    radial-gradient(at 10% 20%, rgba(139, 92, 246, 0.16) 0px, transparent 55%),
+    radial-gradient(at 90% 10%, rgba(6, 182, 212, 0.16) 0px, transparent 55%),
+    radial-gradient(at 50% 90%, rgba(244, 63, 94, 0.11) 0px, transparent 55%),
+    radial-gradient(at 80% 80%, rgba(236, 72, 153, 0.13) 0px, transparent 55%),
+    radial-gradient(at 20% 80%, rgba(45, 212, 191, 0.13) 0px, transparent 55%);
+}
+
+/* Glass & Card Redefinitions under Dark Mode */
+.dark .liquid-glass {
+  background: rgba(17, 24, 39, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 
+    0 10px 40px -10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 
+    0 4px 20px -5px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.03) !important;
+}
+
+.dark .option-card {
+  background: rgba(17, 24, 39, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .option-card:hover {
+  background: rgba(30, 41, 59, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .option-card-selected {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(30, 41, 59, 0.55) 50%, rgba(6, 182, 212, 0.18) 100%) !important;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+  box-shadow: 
+    0 12px 30px -10px rgba(139, 92, 246, 0.35),
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .liquid-glow-box {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.18) 0%, rgba(15, 23, 42, 0.55) 50%, rgba(6, 182, 212, 0.18) 100%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Global Text Fallbacks inside Dark Theme */
+.dark .text-slate-950,
+.dark .text-slate-900,
+.dark h1,
+.dark h2,
+.dark h3 {
+  color: #f8fafc !important;
+}
+
+.dark .text-slate-800 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-750,
+.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+.dark .text-indigo-950 {
+  color: #e0e7ff !important;
+}
+
+.dark .text-indigo-900 {
+  color: #c7d2fe !important;
+}
+
+/* Common Element Background Overrides */
+.dark .bg-white {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .bg-white\/40,
+.dark .bg-white\/60,
+.dark .bg-white\/70,
+.dark .bg-white\/80,
+.dark .bg-white\/90 {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-50\/80 {
+  background-color: rgba(15, 23, 42, 0.75) !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #475569 !important;
+}
+
+/* Common border color overrides */
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-200\/80 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .border-white\/30,
+.dark .border-white\/40,
+.dark .border-white\/50,
+.dark .border-white\/60,
+.dark .border-white\/80 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Scrollbar customization under Dark Mode */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 

@@ -9,13 +9,28 @@ import {
   Target, BookOpen, Smartphone, Users, Sparkles, TrendingUp, 
   Megaphone, Calendar, Gift, FileText, ArrowRight, ArrowLeft, 
   RefreshCw, ClipboardCheck, AlertCircle, Sparkle, BadgeAlert, 
-  ShieldCheck, Loader2, ThumbsUp, Flame, Heart, Check, Eye, EyeOff
+  ShieldCheck, Loader2, ThumbsUp, Flame, Heart, Check, Eye, EyeOff, Sun, Moon
 } from "lucide-react";
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>("intro");
   const [currentStepIdx, setCurrentStepIdx] = useState<number>(0);
   const [highestStepReached, setHighestStepReached] = useState<number>(0);
+
+  // Theme state
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const saved = localStorage.getItem("app_theme");
+    return (saved === "dark" || saved === "light") ? saved : "light";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("app_theme", theme);
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
 
   // Gemini API Key management states
   const [customApiKey, setCustomApiKeyState] = useState<string>("");
@@ -491,6 +506,18 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              className="p-1.5 md:p-2 rounded-full bg-white/40 hover:bg-white/80 dark:bg-slate-800/40 dark:hover:bg-slate-800/80 border border-slate-200/50 dark:border-slate-700/50 text-slate-700 dark:text-slate-200 shadow-xs cursor-pointer transition-all flex items-center justify-center mr-1"
+              title={theme === "light" ? "다크 모드 켜기" : "라이트 모드 켜기"}
+              aria-label="Theme toggle"
+            >
+              {theme === "light" ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
+            </button>
             {customApiKey && validationStatus === "success" ? (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 text-emerald-800 text-[10px] font-bold rounded-full border border-emerald-500/20">
                 <Sparkles className="h-3 w-3 text-emerald-600" />

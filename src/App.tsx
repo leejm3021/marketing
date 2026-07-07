@@ -18,20 +18,20 @@ export default function App() {
   const [highestStepReached, setHighestStepReached] = useState<number>(0);
 
   // Gemini API Key management states
-  const [customApiKey, setCustomApiKeyState] = useState<string>(() => {
-    return localStorage.getItem("gemini_api_key") || "";
-  });
+  const [customApiKey, setCustomApiKeyState] = useState<string>("");
   const [isValidating, setIsValidating] = useState<boolean>(false);
-  const [validationStatus, setValidationStatus] = useState<"idle" | "success" | "error">(
-    localStorage.getItem("gemini_api_key") ? "success" : "idle"
-  );
+  const [validationStatus, setValidationStatus] = useState<"idle" | "success" | "error">("idle");
   const [validationMessage, setValidationMessage] = useState<string>("");
   const [showKey, setShowKey] = useState<boolean>(false);
+
+  // Clear any existing stored key on mount to ensure fresh state
+  useEffect(() => {
+    localStorage.removeItem("gemini_api_key");
+  }, []);
 
   const handleSaveAndValidateKey = async (key: string) => {
     const trimmedKey = key.trim();
     if (!trimmedKey) {
-      localStorage.removeItem("gemini_api_key");
       setCustomApiKeyState("");
       setValidationStatus("idle");
       setValidationMessage("");
@@ -84,10 +84,9 @@ export default function App() {
       }
 
       if (isSuccess) {
-        localStorage.setItem("gemini_api_key", trimmedKey);
         setCustomApiKeyState(trimmedKey);
         setValidationStatus("success");
-        setValidationMessage("API Key가 성공적으로 검증 및 저장되었습니다!");
+        setValidationMessage("API Key가 성공적으로 검증되었습니다!");
       } else {
         setValidationStatus("error");
         setValidationMessage(errorMsg);
